@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+This defines namespace for this particular file, so that we can 
+later on reference things declared here. 
+tns for this document
+xsd for default datatypes 
+soap for SOAP bindings (not used here)
+-->
+<definitions name="SibAccessNota"
+
+        targetNamespace="urn:SibAccessNota"
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+ <types>
+     <xmlns:simpleType name="sibstatus_t">
+      <xmlns:restriction base="nota:uint32_t">
+      <!-- Operation completed successfully. -->
+      <xmlns:enumeration
+      value="0x0000">SSStatus_Success</xmlns:enumeration>
+      <!-- Notifications: -->
+
+      <xmlns:enumeration
+      value="0x0001">SSStatus_SIB_Notification_Reset</xmlns:enumeration>
+      <xmlns:enumeration
+      value="0x0002">SSStatus_SIB_Notification_Closing</xmlns:enumeration>
+
+      <!-- Errors: -->
+      <!-- In case of error, non of the requested actions are carried out  -->
+      <!-- and other returned values are not valid.                              -->
+      <xmlns:enumeration
+      value="0x0003">SSStatus_SIB_Error</xmlns:enumeration>
+      <xmlns:enumeration value="0x0004">SSStatus_SIB_Error_AcessDenied</xmlns:enumeration>
+      <xmlns:enumeration value="0x0005">SSStatus_SIB_Failure_OutOfResources</xmlns:enumeration>
+      <xmlns:enumeration value="0x0006">SSStatus_SIB_Failure_NotImplemented</xmlns:enumeration>      
+      <xmlns:enumeration
+      value="0x0007">SSStatus_KP_Error</xmlns:enumeration>
+      <xmlns:enumeration
+      value="0x0008">SSStatus_KP_Request</xmlns:enumeration>
+      <xmlns:enumeration
+      value="0x0009">SSStatus_KP_Message_Incomplete</xmlns:enumeration>
+      <xmlns:enumeration value="0x000a">SSStatus_KP_Message_Syntax</xmlns:enumeration>
+      </xmlns:restriction>
+      </xmlns:simpleType>        
+
+     <xmlns:simpleType name="encoding_t">
+      <xmlns:restriction base="nota:uint32_t">
+      <xmlns:enumeration value="0x0000">ENC_RDF_M3</xmlns:enumeration>
+      <xmlns:enumeration value="0x0001">ENC_RDF_XML</xmlns:enumeration>
+      </xmlns:restriction>
+      </xmlns:simpleType>        
+
+     <xmlns:simpleType name="query_format_t">
+      <xmlns:restriction base="nota:uint32_t">
+      <xmlns:enumeration value="0x0000">QFORMAT_RDF_XML</xmlns:enumeration>
+      <xmlns:enumeration value="0x0001">QFORMAT_RDF_M3</xmlns:enumeration>
+      <xmlns:enumeration value="0x0002">QFORMAT_WQL_VALUES</xmlns:enumeration>
+      <xmlns:enumeration value="0x0003">QFORMAT_WQL_NODETYPES</xmlns:enumeration>
+      <xmlns:enumeration value="0x0004">QFORMAT_WQL_RELATED</xmlns:enumeration>
+      <xmlns:enumeration value="0x0005">QFORMAT_WQL_ISTYPE</xmlns:enumeration>
+      <xmlns:enumeration value="0x0006">QFORMAT_WQL_ISSUBTYPE</xmlns:enumeration>
+      <xmlns:enumeration value="0x0007">QFORMAT_SPARQL</xmlns:enumeration>
+      </xmlns:restriction>
+      </xmlns:simpleType>
+
+    <xmlns:simpleType name="confirm_t">
+      <xmlns:restriction base="nota:uint32_t">
+      <xmlns:enumeration value="0x0000">CONFIRM_NO</xmlns:enumeration>
+      <xmlns:enumeration value="0x0001">CONFIRM_YES</xmlns:enumeration>
+      </xmlns:restriction>
+      </xmlns:simpleType>
+
+
+    </types>
+
+    <!-- Specified communication messages -->
+
+    <!-- Sending and receiving functions  -->
+    <message name="Join_req" code="0x1001" direction="in">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="credentials" type="nota:bdata"/>
+    </message>
+
+    <message name="Join_cnf" code="0x1002" direction="out">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="status" type="sibstatus_t"/>
+        <part name="credentials" type="nota:bdata"/>
+    </message>
+
+    <message name="Insert_req" code="0x1003" direction="in">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="encoding" type="encoding_t"/>
+        <part name="insert_graph" type="nota:bdata"/>
+        <part name="confirm" type="confirm_t"/>
+    </message>
+
+    <message name="Insert_cnf" code="0x1004" direction="out">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="status" type="sibstatus_t"/>
+        <part name="bNodes" type="nota:bdata"/>
+    </message>
+
+    <message name="Remove_req" code="0x1005" direction="in">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="encoding" type="encoding_t"/>
+        <part name="remove_graph" type="nota:bdata"/>
+        <part name="confirm" type="confirm_t"/>
+    </message>
+
+    <message name="Remove_cnf" code="0x1006" direction="out">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="status" type="sibstatus_t"/>
+    </message>
+
+    <message name="Update_req" code="0x1007" direction="in">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="encoding" type="encoding_t"/>
+        <part name="insert_graph" type="nota:bdata"/>
+        <part name="remove_graph" type="nota:bdata"/>
+        <part name="confirm" type="confirm_t"/>
+    </message>
+
+    <message name="Update_cnf" code="0x1008" direction="out">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="status" type="sibstatus_t"/>
+        <part name="bNodes" type="nota:bdata"/>
+    </message>
+
+
+    <message name="Query_req" code="0x1009" direction="in">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="format" type="query_format_t"/>
+        <part name="query" type="nota:bdata"/>
+        <part name="confirm" type="confirm_t"/>
+    </message>
+
+    <message name="Query_cnf" code="0x100a" direction="out">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="status" type="sibstatus_t"/>
+        <part name="results" type="nota:bdata"/>
+    </message>
+
+    <message name="Subscribe_req" code="0x100b" direction="in">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="format" type="query_format_t"/>
+        <part name="query" type="nota:bdata"/>
+        <part name="results" type="confirm_t"/>
+    </message>
+
+    <message name="Subscribe_cnf" code="0x100c" direction="out">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="status" type="sibstatus_t"/>
+        <part name="subscription_id" type="nota:bdata"/>
+        <part name="results" type="nota:bdata"/>
+    </message>
+
+    <message name="Unsubscribe_req" code="0x100d" direction="in">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="subscription_id" type="nota:bdata"/>
+    </message>
+
+    <message name="Unsubscribe_cnf" code="0x100e" direction="out">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="status" type="sibstatus_t"/>
+    </message>
+
+    <message name="Leave_req" code="0x100f" direction="in">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+    </message>
+
+    <message name="Leave_cnf" code="0x1010" direction="out">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="status" type="sibstatus_t"/>
+    </message>
+
+
+
+    <!-- oneway notification message-->
+
+    <message name="Subscription_ind" code = "0x1020" direction="out">
+        <!-- Error code. 0 = OK; others, see error code list. -->
+	<part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="seqnum" type="nota:uint32_t"/>
+        <part name="subscription_id" type="nota:bdata"/>
+        <part name="new_results" type="nota:bdata"/>
+        <part name="obsolete_results" type="nota:bdata"/>
+    </message>
+
+    <message name="Unsubscribe_ind" code="0x1021" direction="out">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="status" type="sibstatus_t"/>
+        <part name="subscription_id" type="nota:bdata"/>
+    </message>
+
+    <message name="Leave_ind" code="0x1022" direction="out">
+        <part name="nodeid" type="nota:bdata"/>
+        <part name="spaceid" type="nota:bdata"/>
+        <part name="msgnum" type="nota:uint32_t"/>
+        <part name="status" type="sibstatus_t"/>
+    </message>
+
+</definitions>

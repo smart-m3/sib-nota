@@ -1,0 +1,289 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+NoTA_System_ResourceMng_R01_01.wsdl
+
+Description:
+  NoTA resource manager Rel01.01 interface description.
+
+Change History:
+
+  VER   DATE/AUTHOR             COMMENT
+  0.1   2007-06-11/TiE          First version.
+  0.2   2008-03-03/TiE,FTa,MHu  Reviewed
+  0.3   2008-03-03/TiE          Challenge-response simplified
+  
+Copyright (C) 2008 Nokia Corporation. All rights reserved.
+-->
+
+<definitions
+	name="NoTA_System_ResourceMng_R01_01"
+	xmlns="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <!--            Local type definitions             -->
+  <types>
+    <!-- Status options. -->
+    <simpleType name="status_t">
+      <restriction base="nota:uint32_t">
+      <!-- Operation completed successfully. -->
+      <enumeration value="0x0000">S_OK</enumeration>
+      <!-- Errors: -->
+      <!-- In case of error, non of the requested actions are carried out  -->
+      <!-- and other returned values are not valid.                              -->
+      <enumeration value="0x1000">E_GENERAL_ERROR</enumeration>
+      <enumeration value="0x1010">E_SERVICE_NOT_FOUND</enumeration>
+      <enumeration value="0x1020">E_UNKNOWN_EVENT</enumeration>      
+      <enumeration value="0x2000">E_INSUFFICIENT_RIGHTS</enumeration>
+      </restriction>
+    </simpleType>
+
+
+    <!-- Event options. -->
+    <simpleType name="event_t">
+      <restriction base="nota:int32_t">
+      <enumeration value="0x0001">EVENT_SERVICE_REGISTERED</enumeration>
+      <enumeration value="0x0002">EVENT_SERVICE_DEREGISTERED</enumeration>
+      </restriction>
+    </simpleType>
+
+    <!-- Service list type. -->
+    <complexType name="servicelist_t">
+      <sequence>
+        <element name="service_desc" type="nota:bdata" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+      </sequence>
+    </complexType>    
+  </types>
+
+  <!--           Service message interface           -->
+  <!--                 Registration                  -->
+  <message name="Register_req" code="0x0001" direction="in">
+    <documentation>
+      Message for registering a service.
+    </documentation>
+    <part name="ontology_name" type="nota:bdata">
+      <documentation>
+        Name for the used service ontology (e.f. "NoTA").
+      </documentation>
+    </part>
+    <part name="service_desc" type="nota:bdata">
+      <documentation>
+        Service description following the defined ontology (e.g. "NoTA_ServiceName_R01_01_v02).
+      </documentation>
+    </part>
+    <part name="cert_reg" type="nota:bdata">
+      <documentation>
+        Service registration certificate.
+      </documentation>
+    </part>
+  </message>
+  
+  <message name="Register_cnf" code="0x0002" direction="out">
+    <documentation>
+      Returns SID and status for the registration request.
+    </documentation>
+    <part name="status" type="tns:status_t">
+      <documentation>
+        Error code (S_OK, E_GENERAL_ERROR, E_INSUFFICIENT_RIGHTS).        
+      </documentation>
+    </part>
+    <part name="sid" type="nota:sid_t">
+      <documentation>
+        Device context unique Service Identifier (SID).
+      </documentation>
+    </part>
+    <part name="cert_dereg" type="nota:bdata">
+      <documentation>
+        Certificate needed for deregistering the service (NULL string = no certificate needed).
+      </documentation>
+    </part>
+    <part name="cert_act" type="nota:bdata">
+      <documentation>
+        Certificate for activating the service (NULL string = no certificate needed).
+      </documentation>
+    </part>
+  </message>
+
+  <!--               Deregistration                 -->
+  <message name="Deregister_req" code="0x0003" direction="in">
+    <documentation>
+      Message for deregistering a service.
+    </documentation>
+    <part name="sid" type="nota:sid_t">
+      <documentation>
+        Device context unique Service Identifier (SID).
+      </documentation>
+    </part>
+    <part name="certificate" type="nota:bdata">
+      <documentation>
+        Certificate for deregistering the service.
+      </documentation>
+    </part>
+  </message>
+
+  <message name="Deregister_cnf" code="0x0004" direction="out">
+    <documentation>
+      Returns status for the deregistration request.
+    </documentation>
+    <part name="status" type="tns:status_t">
+      <documentation>
+        Error code (S_OK, E_GENERAL_ERROR, E_INSUFFICIENT_RIGHTS).
+      </documentation>
+    </part>
+  </message>
+
+  <!--     Challenge-response related messages      -->
+  <message name="Challenge_ind" code="0x0010" direction="out">
+    <documentation>
+      Challenge indication needed e.g. for service registration and deregistration.
+    </documentation>
+    <part name="challenge" type="nota:bdata">
+      <documentation>
+        Challenge data.
+      </documentation>
+    </part>
+  </message>
+
+  <message name="Challenge_rsp" code="0x0011" direction="in">
+    <documentation>
+      Responce to challenge indication.
+    </documentation>
+    <part name="challenge" type="nota:bdata">
+      <documentation>
+        Challenge response data.
+      </documentation>
+    </part>
+  </message>
+
+  <!--     Service resolution and discovery         -->
+  <message name="ResolveService_req" code="0x0020" direction="in">
+    <documentation>
+      Message for resolving service desc. into SID.
+    </documentation>
+    <part name="ontology_name" type="nota:bdata">
+      <documentation>
+        Name for the used service ontology (e.f. "NoTA").
+      </documentation>
+    </part>
+    <part name="service_desc" type="nota:bdata">
+      <documentation>
+        Service name following the defined ontology.
+      </documentation>
+    </part>
+  </message>
+
+  <message name="ResolveService_cnf" code="0x0021" direction="out">
+    <documentation>
+      Returns SID for the resolve request.
+    </documentation>
+    <part name="status" type="tns:status_t">
+      <documentation>
+        Error code (S_OK, E_SERVICE_NOT_FOUND, E_GENERAL_ERROR).
+      </documentation>
+    </part>
+    <part name="sid" type="nota:sid_t">
+      <documentation>
+        Device context unique Service Identifier (SID).
+      </documentation>
+    </part>
+  </message>
+
+  <message name="ListOfServices_req" code="0x0030" direction="in">
+    <documentation>
+      Message for retrieving list of registered services.
+    </documentation>
+    <part name="ontology_name" type="nota:bdata">
+      <documentation>
+        Name of the ontology whose service list is requested.
+      </documentation>
+    </part>
+  </message>
+
+  <message name="ListOfServices_cnf" code="0x0031" direction="out">
+    <documentation>
+      List of services registered at the RM.
+    </documentation>
+    <part name="servicelist" type="tns:servicelist_t">
+      <documentation>
+        List of registered services belonging to the ontology in the request.
+      </documentation>
+    </part>  
+  </message>
+
+  <!--           Event operations                   -->
+  <message name="NewEvent_req" code="0100" direction="in">
+    <documentation>
+      Activates an event that triggers when the given service registers
+      or deregisters itself.
+    </documentation>
+    <part name="event_t" type="tns:event_t">
+      <documentation>
+        Event type (see enumeration).
+      </documentation>
+    </part>
+    <part name="ontology_name" type="nota:bdata">
+      <documentation>
+        Name for the used service ontology (e.f. "NoTA").
+      </documentation>
+    </part>
+    <part name="service_desc" type="nota:bdata">
+      <documentation>
+        Service name following the defined ontology.
+      </documentation>
+    </part>
+  </message>
+
+  <message name="NewEvent_cnf" code="0101" direction="out">
+    <documentation>
+      Returns event ID and status for creating an event.
+    </documentation>
+    <part name="event_id" type="nota:int32_t">
+      <documentation>
+        Session-wise unique event ID.
+      </documentation>
+    </part>
+    <part name="status" type="tns:status_t">
+      <documentation>
+        Error code (S_OK, E_GENERAL_ERROR)
+      </documentation>
+    </part>
+  </message>
+
+  <message name="NewEvent_ind" code="0102" direction="out">
+    <documentation>
+      Event when a new Service has registered and activated itself.
+    </documentation>
+    <part name="event_id" type="nota:uint32_t">
+      <documentation>
+        Session-wise unique event ID.
+      </documentation>
+    </part>
+    <part name="event_t" type="tns:event_t">
+      <documentation>
+        Event type (see enumeration).
+      </documentation>
+    </part>
+  </message>
+
+  <message name="DeleteEvent_req" code="0103" direction="in">
+    <documentation>
+      Deletes an existing event.
+    </documentation>
+    <part name="event_id" type="nota:uint32_t">
+      <documentation>
+        Session-wise unique event ID.
+      </documentation>
+    </part>
+  </message>
+
+  <message name="DeleteEvent_cnf" code="0104" direction="out">
+    <documentation>
+      Status for deleting an event.
+    </documentation>
+    <part name="status" type="tns:status_t">
+      <documentation>
+        Error code (S_OK, E_UNKNOWN_EVENT, E_GENERAL_ERROR)
+      </documentation>
+    </part>
+  </message>
+
+</definitions>
